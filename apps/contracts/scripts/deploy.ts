@@ -6,6 +6,10 @@ async function main() {
     await run("deploy:events", {
         verifierAddress
     })
+
+    await run ("deploy:procor",{
+        verifierAddress
+    })
 }
 
 main()
