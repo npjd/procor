@@ -4,7 +4,7 @@ import { Contract, providers, utils, Wallet } from "ethers"
 import express from "express"
 import { resolve } from "path"
 import { abi as eventsAbi } from "../contracts/build/contracts/contracts/Events.sol/Events.json"
-import {abi as procorAbi} from "../contracts/build/contracts/contracts/Procor.sol/Procor.json"
+import { abi as procorAbi } from "../contracts/build/contracts/contracts/Procor.sol/Procor.json"
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") })
 
@@ -77,24 +77,59 @@ app.post("/add-member", async (req, res) => {
 })
 
 app.post("/ask-question", async (req, res) => {
+    const { sessionId, question, root, nullifierHash, solidityProof } = req.body
 
+    try {
+        const transaction = await procorContract.postQuestion(
+            sessionId,
+            utils.formatBytes32String(question),
+            root,
+            nullifierHash,
+            solidityProof
+        )
+
+        await transaction.wait()
+
+        res.status(200).end()
+    } catch (error: any) {
+        console.error(error)
+
+        res.status(500).end()
+    }
 })
 
 app.post("/vote-question", async (req, res) => {
+    const { signal, root, nullifierHash, externalNullifier, solidityProof } = req.body
+    try {
+        const transaction = await procorContract.voteQuestion(
+            signal,
+            root,
+            nullifierHash,
+            externalNullifier,
+            solidityProof
+        )
 
+        await transaction.wait()
+
+        res.status(200).end()
+        
+    } catch (error: any) {
+        console.error(error)
+
+        res.status(500).end()
+    }
 })
 
 app.post("/join-survey", async (req, res) => {
-    const {sessionId, identityCommitment} = req.body
+    const { sessionId, identityCommitment } = req.body
 
-    try{
+    try {
         const transaction = await procorContract.joinSession(sessionId, identityCommitment)
 
         await transaction.wait()
 
         res.status(200).end()
-    }
-    catch(error: any){
+    } catch (error: any) {
         console.error(error)
 
         res.status(500).end()

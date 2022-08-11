@@ -135,7 +135,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
     // ask question
     function postQuestion(
         uint256 sessionId,
-        bytes32 confession,
+        bytes32 quesiton,
         uint256 root,
         uint256 nullifierHash,
         uint256[8] calldata proof
@@ -146,7 +146,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         notOverQuestionLimit(sessionId)
     {
         _verifyProof(
-            confession,
+            quesiton,
             root,
             nullifierHash,
             sessionId,
@@ -154,7 +154,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
             verifier
         );
 
-        Question memory q = Question({votes: 0, content: confession});
+        Question memory q = Question({votes: 0, content: quesiton});
         sessions[sessionId].questions.push(q);
 
         _saveNullifierHash(nullifierHash);
