@@ -3,7 +3,8 @@ import { config as dotenvConfig } from "dotenv"
 import { Contract, providers, utils, Wallet } from "ethers"
 import express from "express"
 import { resolve } from "path"
-import { abi as contractAbi } from "../contracts/build/contracts/contracts/Events.sol/Events.json"
+import { abi as eventsAbi } from "../contracts/build/contracts/contracts/Events.sol/Events.json"
+import {abi as procorAbi} from "../contracts/build/contracts/contracts/Procor.sol/Procor.json"
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") })
 
@@ -35,13 +36,14 @@ app.use(express.json())
 
 const provider = new providers.JsonRpcProvider(ethereumURL)
 const signer = new Wallet(ethereumPrivateKey, provider)
-const contract = new Contract(contractAddress, contractAbi, signer)
+const eventsContract = new Contract(contractAddress, eventsAbi, signer)
+const procorContract = new Contract(contractAddress, procorAbi, signer)
 
 app.post("/post-review", async (req, res) => {
     const { review, nullifierHash, groupId, solidityProof } = req.body
 
     try {
-        const transaction = await contract.postReview(
+        const transaction = await eventsContract.postReview(
             utils.formatBytes32String(review),
             nullifierHash,
             groupId,
@@ -62,12 +64,37 @@ app.post("/add-member", async (req, res) => {
     const { groupId, identityCommitment } = req.body
 
     try {
-        const transaction = await contract.addMember(groupId, identityCommitment)
+        const transaction = await eventsContract.addMember(groupId, identityCommitment)
 
         await transaction.wait()
 
         res.status(200).end()
     } catch (error: any) {
+        console.error(error)
+
+        res.status(500).end()
+    }
+})
+
+app.post("/ask-question", async (req, res) => {
+
+})
+
+app.post("/vote-question", async (req, res) => {
+
+})
+
+app.post("/join-survey", async (req, res) => {
+    const {sessionId, identityCommitment} = req.body
+
+    try{
+        const transaction = await procorContract.joinSession(sessionId, identityCommitment)
+
+        await transaction.wait()
+
+        res.status(200).end()
+    }
+    catch(error: any){
         console.error(error)
 
         res.status(500).end()

@@ -4,7 +4,7 @@
     "main": "index.js",
     "scripts": {
         "start": "hardhat node & yarn compile && yarn deploy --network localhost",
-        "compile": "hardhat compile",
+        "compile": "hardhat compile --show-stack-traces",
         "download:snark-artifacts": "hardhat run scripts/download-snark-artifacts.ts",
         "deploy": "hardhat run scripts/deploy.ts",
         "deploy:events": "hardhat deploy:events",

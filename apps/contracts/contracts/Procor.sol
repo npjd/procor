@@ -34,16 +34,17 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
     uint256 fee = 1000000000000000000;
 
     // structs
+
+    struct Question {
+        uint256 votes;
+        bytes32 content;
+    }
+
     struct Session {
         uint256 sessionId;
         address owner;
         uint256 state;
         Question[] questions;
-    }
-
-    struct Question {
-        uint256 votes;
-        bytes32 content;
     }
 
     // modifiers
@@ -87,12 +88,11 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         require(msg.value >= fee, "insufficient funds");
         _createGroup(sessionId, 20, 0);
 
-        sessions[sessionId] = Session({
-            sessionId: sessionId,
-            owner: msg.sender,
-            state: NOT_STARTED,
-            questions: new Question[](0)
-        });
+        // THESE LINES ARE CAUSING IT
+        sessions[sessionId].sessionId = sessionId;
+        sessions[sessionId].owner = msg.sender;
+        sessions[sessionId].state = NOT_STARTED;
+
     }
 
     // start session
@@ -187,6 +187,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         sessions[sessionId].questions[questionId].votes++;
         _saveNullifierHash(nullifierHash);
         return (questionId, sessions[sessionId].questions[questionId].votes);
+        // return (questionId, 1);
     }
 
     function withdrawFunds() external onlyOwner returns (uint256) {
