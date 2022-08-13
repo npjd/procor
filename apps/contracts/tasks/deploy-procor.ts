@@ -1,7 +1,7 @@
 import { poseidon_gencontract as poseidonContract } from "circomlibjs"
 import { task, types } from "hardhat/config"
 
-task("deploy:events", "Deploy a Procor contract")
+task("deploy:procor", "Deploy a Procor contract")
     .addParam<number>("verifierAddress", "Semaphore verifier address", undefined, types.string)
     .addOptionalParam<number>("treeDepth", "Merkle tree depth", Number(process.env.TREE_DEPTH) || 20, types.int)
     .addOptionalParam("logs", "Print the logs", true, types.boolean)

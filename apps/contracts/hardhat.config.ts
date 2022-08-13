@@ -12,6 +12,7 @@ import { config } from "./package.json"
 import "./tasks/accounts"
 import "./tasks/deploy-events"
 import "./tasks/deploy-verifier"
+import "./tasks/deploy-procor"
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") })
 

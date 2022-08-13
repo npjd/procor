@@ -9,6 +9,7 @@
         "deploy": "hardhat run scripts/deploy.ts",
         "deploy:events": "hardhat deploy:events",
         "deploy:verifier": "hardhat deploy:verifier",
+        "deploy:procor":"hardhat deploy:procor",
         "test": "hardhat test",
         "test:report-gas": "REPORT_GAS=true hardhat test",
         "test:coverage": "hardhat coverage",
