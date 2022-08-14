@@ -3,7 +3,7 @@ import IconChevronLeft from "../icons/IconChevronLeft"
 import IconChevronRight from "../icons/IconChevronRight"
 
 export type StepperProps = {
-    step: number
+    step: "identity" | "session" | "sessions"
     onPrevClick?: (() => void) | false
     onNextClick?: (() => void) | false
 }
@@ -27,7 +27,7 @@ export default function Stepper({ step, onPrevClick, onNextClick }: StepperProps
             )}
 
             <Text textAlign="center" flex="1" fontWeight="bold">
-                {step.toString()}/3
+                {step.toUpperCase()}
             </Text>
 
             {onNextClick !== undefined ? (

@@ -8,10 +8,9 @@ import Stepper from "./Stepper"
 export type IdentityStepProps = {
     onNextClick: () => void
     onChange: (identity: Identity) => void
-    onLog: (message: string) => void
 }
 
-export default function IdentityStep({ onChange, onNextClick, onLog }: IdentityStepProps) {
+export default function IdentityStep({ onChange, onNextClick }: IdentityStepProps) {
     const [_identity, setIdentity] = useState<Identity>()
 
     useEffect(() => {
@@ -23,9 +22,7 @@ export default function IdentityStep({ onChange, onNextClick, onLog }: IdentityS
             setIdentity(identity)
 
             onChange(identity)
-            onLog("Your Semaphore identity was retrieved from the browser cache 👌🏽")
         } else {
-            onLog("Create your Semaphore identity 👆🏽")
         }
     }, [])
 
@@ -37,7 +34,6 @@ export default function IdentityStep({ onChange, onNextClick, onLog }: IdentityS
         localStorage.setItem("identity", identity.toString())
 
         onChange(identity)
-        onLog("Your new Semaphore identity was just created 🎉")
     }, [])
 
     return (
@@ -98,7 +94,7 @@ export default function IdentityStep({ onChange, onNextClick, onLog }: IdentityS
 
             <Divider pt="3" borderColor="gray" />
 
-            <Stepper step={1} onNextClick={!!_identity && onNextClick} />
+            <Stepper step={"identity"} onNextClick={!!_identity && onNextClick} />
         </>
     )
 }

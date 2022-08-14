@@ -21,6 +21,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
     // state
     mapping(uint256 => Session) public sessions;
     mapping(uint256 => uint256[]) public sessionIdentityCommitments;
+    uint256[] public sessionIds;
 
     // verifier
     IVerifier public verifier;
@@ -88,10 +89,11 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         require(msg.value >= fee, "insufficient funds");
         _createGroup(sessionId, 20, 0);
 
-        // THESE LINES ARE CAUSING IT
         sessions[sessionId].sessionId = sessionId;
         sessions[sessionId].owner = msg.sender;
         sessions[sessionId].state = NOT_STARTED;
+
+        sessionIds.push(sessionId);
 
     }
 

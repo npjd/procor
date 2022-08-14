@@ -1,4 +1,4 @@
-import { ChakraProvider, Container, HStack, Spinner, Stack, Text } from "@chakra-ui/react"
+import { ChakraProvider, Container, HStack, List, Spinner, Stack, Text } from "@chakra-ui/react"
 import "@fontsource/inter/400.css"
 import detectEthereumProvider from "@metamask/detect-provider"
 import { Identity } from "@semaphore-protocol/identity"
@@ -8,18 +8,19 @@ import { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import Events from "../../contracts/build/contracts/contracts/Events.sol/Events.json"
 import theme from "../styles"
-import GroupStep from "./components/GroupStep"
+import ListSessions from "./components/ListSessions"
 import IdentityStep from "./components/IdentityStep"
-import ProofStep from "./components/ProofStep"
+import Session from "./components/Session"
+import { Session as SessionType } from "./types/Session"
 
 function App() {
-    const [_logs, setLogs] = useState<string>("")
-    const [_step, setStep] = useState<number>(1)
+    const [_step, setStep] = useState<"identity" | "session" | "sessions">("identity")
     const [_identity, setIdentity] = useState<Identity>()
     const [_signer, setSigner] = useState<Signer>()
     const [_contract, setContract] = useState<Contract>()
-    const [_event, setEvent] = useState<any>()
+    const [_session, setSession] = useState<SessionType>()
 
+    // TODO: change contract
     useEffect(() => {
         ;(async () => {
             const ethereum = (await detectEthereumProvider()) as any
@@ -58,45 +59,30 @@ function App() {
         <>
             <Container maxW="lg" flex="1" display="flex" alignItems="center">
                 <Stack>
-                    {_step === 1 ? (
-                        <IdentityStep onChange={setIdentity} onLog={setLogs} onNextClick={() => setStep(2)} />
-                    ) : _step === 2 ? (
-                        <GroupStep
+                    {_step === "identity" ? (
+                        <IdentityStep onChange={setIdentity} onNextClick={() => setStep("sessions")} />
+                    ) : _step === "sessions" ? (
+                        <ListSessions
                             signer={_signer}
                             contract={_contract}
                             identity={_identity as Identity}
-                            onPrevClick={() => setStep(1)}
+                            onPrevClick={() => setStep("identity")}
                             onSelect={(event) => {
-                                setEvent(event)
-                                setStep(3)
+                                setSession(event)
+                                setStep("session")
                             }}
-                            onLog={setLogs}
                         />
                     ) : (
-                        <ProofStep
+                        <Session
                             signer={_signer}
                             contract={_contract}
                             identity={_identity as Identity}
-                            event={_event}
-                            onPrevClick={() => setStep(2)}
-                            onLog={setLogs}
+                            event={_session}
+                            onPrevClick={() => setStep("sessions")}
                         />
                     )}
                 </Stack>
             </Container>
-
-            <HStack
-                flexBasis="56px"
-                borderTop="1px solid #8f9097"
-                backgroundColor="#DAE0FF"
-                align="center"
-                justify="center"
-                spacing="4"
-                p="4"
-            >
-                {_logs.endsWith("...") && <Spinner color="primary.400" />}
-                <Text fontWeight="bold">{_logs || `Current step: ${_step}`}</Text>
-            </HStack>
         </>
     )
 }
