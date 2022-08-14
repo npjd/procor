@@ -120,7 +120,7 @@ app.post("/vote-question", async (req, res) => {
     }
 })
 
-app.post("/join-survey", async (req, res) => {
+app.post("/join-session", async (req, res) => {
     const { sessionId, identityCommitment } = req.body
 
     try {
