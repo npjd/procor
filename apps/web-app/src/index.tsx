@@ -6,7 +6,7 @@ import { Contract, providers, Signer } from "ethers"
 import { hexlify } from "ethers/lib/utils"
 import { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
-import Events from "../../contracts/build/contracts/contracts/Events.sol/Events.json"
+import Procor from "../../contracts/build/contracts/contracts/Procor.sol/Procor.json"
 import theme from "../styles"
 import ListSessions from "./components/ListSessions"
 import IdentityStep from "./components/IdentityStep"
@@ -40,14 +40,14 @@ function App() {
             if (accounts[0]) {
                 setSigner(ethersProvider.getSigner())
 
-                setContract(new Contract(process.env.CONTRACT_ADDRESS!, Events.abi, ethersProvider.getSigner()))
+                setContract(new Contract(process.env.CONTRACT_ADDRESS!, Procor.abi, ethersProvider.getSigner()))
             }
 
             ethereum.on("accountsChanged", (newAccounts: string[]) => {
                 if (newAccounts.length !== 0) {
                     setSigner(ethersProvider.getSigner())
 
-                    setContract(new Contract(process.env.CONTRACT_ADDRESS!, Events.abi, ethersProvider.getSigner()))
+                    setContract(new Contract(process.env.CONTRACT_ADDRESS!, Procor.abi, ethersProvider.getSigner()))
                 } else {
                     setSigner(undefined)
                 }
