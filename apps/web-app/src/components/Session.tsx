@@ -15,10 +15,9 @@ export type ProofStepProps = {
     identity: Identity
     event: any
     onPrevClick: () => void
-    onLog: (message: string) => void
 }
 
-export default function Session({ signer, contract, event, identity, onPrevClick, onLog }: ProofStepProps) {
+export default function Session({ signer, contract, event, identity, onPrevClick }: ProofStepProps) {
     const [_loading, setLoading] = useBoolean()
     const [_reviews, setReviews] = useState<any[]>([])
 
@@ -42,7 +41,7 @@ export default function Session({ signer, contract, event, identity, onPrevClick
 
             if (review) {
                 setLoading.on()
-                onLog(`Posting your anonymous review...`)
+                // onLog(`Posting your anonymous review...`)
 
                 try {
                     const members = await contract.queryFilter(contract.filters.MemberAdded(event.groupId))
@@ -72,14 +71,14 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                     if (status === 200) {
                         setReviews((v) => [...v, review])
 
-                        onLog(`Your review was posted 🎉`)
+                        // onLog(`Your review was posted 🎉`)
                     } else {
-                        onLog("Some error occurred, please try again!")
+                        // onLog("Some error occurred, please try again!")
                     }
                 } catch (error) {
                     console.error(error)
 
-                    onLog("Some error occurred, please try again!")
+                    // onLog("Some error occurred, please try again!")
                 } finally {
                     setLoading.off()
                 }
