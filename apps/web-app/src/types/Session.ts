@@ -3,6 +3,7 @@ export interface Session {
     owner: string
     state: number
     questions: Question[]
+    members: string[]
 }
 
 export interface Question {

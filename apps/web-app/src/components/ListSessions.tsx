@@ -125,8 +125,8 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
     //     [_identityCommitment]
     // )
 
-    const selectEvent = useCallback((event: Session) => {
-        onSelect(event)
+    const selectSession = useCallback((_session: Session) => {
+        onSelect(_session)
 
         // onLog(`Post your anonymous reviews in the '${event.eventName}' event 👍🏽`)
     }, [])
@@ -156,7 +156,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                     leftIcon={<IconRefreshLine />}
                     variant="link"
                     color="text.700"
-                    onClick={() => getEvents().then(setEvents)}
+                    onClick={() => getSessions().then(getSessions)}
                 >
                     Refresh
                 </Button>
@@ -169,7 +169,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                     justifyContent="left"
                     colorScheme="primary"
                     px="4"
-                    onClick={createEvent}
+                    onClick={createSession}
                     isDisabled={_loading}
                     leftIcon={<IconAddCircleFill />}
                 >
@@ -177,9 +177,9 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                 </Button>
             </Box>
 
-            {_events.length > 0 && (
+            {_sessions.length > 0 && (
                 <VStack spacing="3">
-                    {_events.map((event, i) => (
+                    {_sessions.map((_session, i) => (
                         <HStack
                             key={i}
                             justify="space-between"
@@ -189,13 +189,13 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                             borderWidth={1}
                         >
                             <Text>
-                                <b>{event.eventName}</b> ({event.members.length}{" "}
-                                {event.members.length === 1 ? "member" : "members"})
+                                <b>{_session.owner}</b> ({_session.members.length}{" "}
+                                {_session.members.length === 1 ? "member" : "members"})
                             </Text>
 
-                            {event.members.includes(_identityCommitment) ? (
+                            {_session.members.includes(_identityCommitment||"") ? (
                                 <Button
-                                    onClick={() => selectEvent(event)}
+                                    onClick={() => selectSession(_session)}
                                     isDisabled={_loading}
                                     leftIcon={<IconCheck />}
                                     colorScheme="primary"
@@ -206,7 +206,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                                 </Button>
                             ) : (
                                 <Button
-                                    onClick={() => joinEvent(event)}
+                                    // onClick={() => joinSession(_session)}
                                     isDisabled={_loading}
                                     colorScheme="primary"
                                     fontWeight="bold"
