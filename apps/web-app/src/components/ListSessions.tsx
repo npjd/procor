@@ -26,10 +26,11 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         if (!signer || !contract) {
             return []
         }
-        // TODO: change these events
+        // TODO: change these events and index data properly
         const sessions = await contract.queryFilter(contract.filters.EventCreated())
         const members = await contract.queryFilter(contract.filters.MemberAdded())
 
+        // change this remapping
         return sessions.map((e) => ({
             groupId: e.args![0],
             eventName: parseBytes32String(e.args![1]),
@@ -39,7 +40,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
 
     useEffect(() => {
         ;(async () => {
-            // TODO: does this even work wtf lol
+            // TODO: does this even work wtf lol, fetch data properly
             const sessions = await getSessions() as unknown as Session[]
 
             if (sessions.length > 0) {

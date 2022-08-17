@@ -45,6 +45,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         uint256 sessionId;
         address owner;
         uint256 state;
+        string eventName;
         Question[] questions;
     }
 
@@ -85,13 +86,14 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
     }
 
     // make session
-    function createSession(uint256 sessionId) external payable {
+    function createSession(uint256 sessionId, string memory eventName) external payable {
         require(msg.value >= fee, "insufficient funds");
         _createGroup(sessionId, 20, 0);
 
         sessions[sessionId].sessionId = sessionId;
         sessions[sessionId].owner = msg.sender;
         sessions[sessionId].state = NOT_STARTED;
+        sessions[sessionId].eventName = eventName;
 
         sessionIds.push(sessionId);
 
