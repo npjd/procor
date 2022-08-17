@@ -19,12 +19,13 @@ export type ProofStepProps = {
 
 export default function Session({ signer, contract, event, identity, onPrevClick }: ProofStepProps) {
     const [_loading, setLoading] = useBoolean()
-    const [_reviews, setReviews] = useState<any[]>([])
+    const [_questions, setQuestions] = useState<any[]>([])
 
-    const getReviews = useCallback(async () => {
+    const getQuestions = useCallback(async () => {
         if (!signer || !contract) {
             return []
         }
+        // TODO: fetch question from contract
 
         const reviews = await contract.queryFilter(contract.filters.ReviewPosted(event.groupId))
 
@@ -32,10 +33,11 @@ export default function Session({ signer, contract, event, identity, onPrevClick
     }, [signer, contract, event])
 
     useEffect(() => {
-        getReviews().then(setReviews)
+        getQuestions().then(setQuestions)
     }, [signer, contract, event])
 
-    const postReview = useCallback(async () => {
+    // TODO: code question posting
+    const postQuestion = useCallback(async () => {
         if (contract && identity) {
             const review = prompt("Please enter your review:")
 
@@ -69,7 +71,7 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                     })
 
                     if (status === 200) {
-                        setReviews((v) => [...v, review])
+                        setQuestions((v) => [...v, review])
 
                         // onLog(`Your review was posted 🎉`)
                     } else {
@@ -85,6 +87,8 @@ export default function Session({ signer, contract, event, identity, onPrevClick
             }
         }
     }, [contract, identity])
+
+    // TODO: add function for voting questions
 
     return (
         <>
@@ -111,7 +115,7 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                     leftIcon={<IconRefreshLine />}
                     variant="link"
                     color="text.700"
-                    onClick={() => getReviews().then(setReviews)}
+                    onClick={() => getQuestions().then(setQuestions)}
                 >
                     Refresh
                 </Button>
@@ -124,7 +128,7 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                     justifyContent="left"
                     colorScheme="primary"
                     px="4"
-                    onClick={postReview}
+                    onClick={postQuestion}
                     isDisabled={_loading}
                     leftIcon={<IconAddCircleFill />}
                 >
@@ -132,11 +136,11 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                 </Button>
             </Box>
 
-            {_reviews.length > 0 && (
+            {_questions.length > 0 && (
                 <VStack spacing="3" align="left">
-                    {_reviews.map((review, i) => (
+                    {_questions.map((_question, i) => (
                         <HStack key={i} p="3" borderWidth={1}>
-                            <Text>{review}</Text>
+                            <Text>{_question}</Text>
                         </HStack>
                     ))}
                 </VStack>
