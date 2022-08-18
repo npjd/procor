@@ -1,5 +1,6 @@
 export interface Session {
-    sessionId:number
+    sessionId: number
+    eventName: string
     owner: string
     state: number
     questions: Question[]

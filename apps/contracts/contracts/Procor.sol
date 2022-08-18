@@ -201,11 +201,15 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         return address(this).balance;
     }
 
-    function viewSession() external view returns (Session[] memory){
-        Session[] memory viewSessions = new Session[](sessionIds.length);
+    function viewSessions() external view returns (Session[] memory){
+        Session[] memory viewSessionsList = new Session[](sessionIds.length);
         for (uint256 i = 0; i < sessionIds.length; i++) {
-            viewSessions[i] = sessions[sessionIds[i]];
+            viewSessionsList[i] = sessions[sessionIds[i]];
         }
-        return viewSessions;
+        return viewSessionsList;
+    }
+
+    function viewSessionIdentitiyCommitments(uint256 sessionId) external view returns (uint256[] memory){
+        return sessionIdentityCommitments[sessionId];
     }
 }

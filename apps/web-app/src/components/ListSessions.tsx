@@ -26,25 +26,32 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         if (!signer || !contract) {
             return []
         }
-        // TODO: change these events and index data properly
-        const sessions = await contract.queryFilter(contract.filters.EventCreated())
-        const members = await contract.queryFilter(contract.filters.MemberAdded())
 
-        // change this remapping
-        return sessions.map((e) => ({
-            groupId: e.args![0],
-            eventName: parseBytes32String(e.args![1]),
-            members: members.filter((m) => m.args![0].eq(e.args![0])).map((m) => m.args![1].toString())
-        }))
+        const sessions = (await contract.viewSessions()) as Session[]
+        console.log("sessions from contract", sessions)
+        const sessionsWithIndentities = await Promise.all(
+            sessions.map(async (session) => {
+                // TODO: check if these numbers work
+                const identityCommitments = await contract.viewSessionIdentitiyCommitments(session.sessionId)
+                console.log("identityCommitments", identityCommitments)
+                return {
+                    ...session,
+                    members: identityCommitments
+                }
+            })
+        )
+
+        return sessionsWithIndentities
     }, [signer, contract])
 
     useEffect(() => {
         ;(async () => {
             // TODO: does this even work wtf lol, fetch data properly
-            const sessions = await getSessions() as unknown as Session[]
+            const sessions = (await getSessions()) as unknown as Session[]
 
             if (sessions.length > 0) {
                 setSessions(sessions)
+                console.log("Sessions Exist!")
 
                 // onLog(
                 //     `${events.length} event${
@@ -59,7 +66,6 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         setIdentityCommitment(identity.generateCommitment().toString())
     }, [identity])
 
-    //TODO: change this
     const createSession = useCallback(async () => {
         if (signer && contract) {
             const sessionName = window.prompt("Please enter your event name:")
@@ -69,14 +75,12 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                 // onLog(`Creating the '${eventName}' event...`)
 
                 try {
-                    // TODO: change the transaction for creating an event
-                    const transaction = await contract.createEvent(formatBytes32String(sessionName))
+                    const transaction = await contract.createSession(_sessions.length, sessionName)
 
                     await transaction.wait()
 
-                    // TODO: uncomment when rest of logic fixed
-                    // setSessions(await getSessions())
-
+                    setSessions(await getSessions())
+                    console.log("session made !!")
                     // onLog(`The '${eventName}' event was just created 🎉`)
                 } catch (error) {
                     console.error(error)
@@ -194,7 +198,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                                 {_session.members.length === 1 ? "member" : "members"})
                             </Text>
 
-                            {_session.members.includes(_identityCommitment||"") ? (
+                            {_session.members.includes(_identityCommitment || "") ? (
                                 <Button
                                     onClick={() => selectSession(_session)}
                                     isDisabled={_loading}
