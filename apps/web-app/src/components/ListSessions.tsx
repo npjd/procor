@@ -94,41 +94,41 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
     }, [signer, contract])
 
     // TODO: change this to contract
-    // const joinSession = useCallback(
-    //     async (event: Session) => {
-    //         if (_identityCommitment) {
-    //             const response = window.confirm(
-    //                 `There are ${event.members.length} members in this event. Are you sure you want to join?`
-    //             )
+    const joinSession = useCallback(
+        async (session: Session) => {
+            if (_identityCommitment) {
+                const response = window.confirm(
+                    `There are ${session.members.length} members in this event. Are you sure you want to join?`
+                )
 
-    //             if (response) {
-    //                 setLoading.on()
-    //                 // onLog(`Joining the '${event.eventName}' event...`)
+                if (response) {
+                    setLoading.on()
+                    // onLog(`Joining the '${event.eventName}' event...`)
 
-    //                 const { status } = await fetch(`${process.env.RELAY_URL}/add-member`, {
-    //                     method: "POST",
-    //                     headers: { "Content-Type": "application/json" },
-    //                     body: JSON.stringify({
-    //                         groupId: event.groupId,
-    //                         identityCommitment: _identityCommitment
-    //                     })
-    //                 })
+                    const { status } = await fetch(`${process.env.RELAY_URL}/add-member`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            groupId: session.sessionId,
+                            identityCommitment: _identityCommitment
+                        })
+                    })
 
-    //                 if (status === 200) {
-    //                     event.members.push(_identityCommitment)
-    //                     onSelect(event)
+                    if (status === 200) {
+                        session.members.push(_identityCommitment)
+                        onSelect(session)
 
-    //                     // onLog(`You joined the '${event.eventName}' event 🎉 Post your anonymous reviews!`)
-    //                 } else {
-    //                     // onLog("Some error occurred, please try again!")
-    //                 }
+                        // onLog(`You joined the '${event.eventName}' event 🎉 Post your anonymous reviews!`)
+                    } else {
+                        // onLog("Some error occurred, please try again!")
+                    }
 
-    //                 setLoading.off()
-    //             }
-    //         }
-    //     },
-    //     [_identityCommitment]
-    // )
+                    setLoading.off()
+                }
+            }
+        },
+        [_identityCommitment]
+    )
 
     const selectSession = useCallback((_session: Session) => {
         onSelect(_session)
@@ -211,7 +211,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                                 </Button>
                             ) : (
                                 <Button
-                                    // onClick={() => joinSession(_session)}
+                                    onClick={() => joinSession(_session)}
                                     isDisabled={_loading}
                                     colorScheme="primary"
                                     fontWeight="bold"
