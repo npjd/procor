@@ -124,6 +124,7 @@ app.post("/join-session", async (req, res) => {
     const { sessionId, identityCommitment } = req.body
 
     try {
+        console.log(sessionId,identityCommitment)
         const transaction = await procorContract.joinSession(sessionId, identityCommitment)
 
         await transaction.wait()

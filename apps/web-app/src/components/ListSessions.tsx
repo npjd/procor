@@ -21,6 +21,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
     const [_loading, setLoading] = useBoolean()
     const [_sessions, setSessions] = useState<Session[]>([])
     const [_identityCommitment, setIdentityCommitment] = useState<string>()
+    const [_address, setAddress] = useState<string>()
 
     const getSessions = useCallback(async () => {
         if (!signer || !contract) {
@@ -59,6 +60,9 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                 //     } were retrieved from the contract 🤙🏽 Join one or create a new one!`
                 // )
             }
+
+            const address = await signer?.getAddress()
+            setAddress(address)
         })()
     }, [signer, contract])
 
@@ -93,7 +97,6 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         }
     }, [signer, contract])
 
-    // TODO: change this to contract
     const joinSession = useCallback(
         async (session: Session) => {
             if (_identityCommitment) {
@@ -105,18 +108,18 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                     setLoading.on()
                     // onLog(`Joining the '${event.eventName}' event...`)
 
-                    const { status } = await fetch(`${process.env.RELAY_URL}/add-member`, {
+                    const { status } = await fetch(`${process.env.RELAY_URL}/join-session`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            groupId: session.sessionId,
+                            sessionId: session.sessionId,
                             identityCommitment: _identityCommitment
                         })
                     })
 
                     if (status === 200) {
-                        session.members.push(_identityCommitment)
-                        onSelect(session)
+                        // session.members.push(_identityCommitment)
+                        // onSelect(session)
 
                         // onLog(`You joined the '${event.eventName}' event 🎉 Post your anonymous reviews!`)
                     } else {
@@ -135,6 +138,31 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
 
         // onLog(`Post your anonymous reviews in the '${event.eventName}' event 👍🏽`)
     }, [])
+
+    const startSession = useCallback(
+        async (_session: Session) => {
+            if (!signer || !contract) {
+                return
+            }
+
+            const address = await signer.getAddress()
+
+            if (address == _session.owner) {
+                setLoading.on()
+                try {
+                    const transaction = await contract.startSession(_session.sessionId)
+                    await transaction.wait()
+                    console.log("session started !!")
+                    setSessions(await getSessions())
+                } catch (error) {
+                    console.error(error)
+                } finally {
+                    setLoading.off()
+                }
+            }
+        },
+        [signer, contract]
+    )
 
     return (
         <>
@@ -194,8 +222,8 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                             borderWidth={1}
                         >
                             <Text>
-                                <b>{_session.owner}</b> ({_session.members.length}{" "}
-                                {_session.members.length === 1 ? "member" : "members"})
+                                <b>{_session.eventName}</b> ({_session.members.length}{" "}
+                                {_session.members.length === 1 ? "member" : "members"}){/* TODO: add owner */}
                             </Text>
 
                             {_session.members.includes(_identityCommitment || "") ? (
@@ -218,6 +246,18 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                                     variant="link"
                                 >
                                     Join
+                                </Button>
+                            )}
+
+                            {_session.owner === _address && _session.state == 1 && (
+                                <Button
+                                    onClick={() => startSession(_session)}
+                                    isDisabled={_loading}
+                                    colorScheme="primary"
+                                    fontWeight="bold"
+                                    variant="link"
+                                >
+                                    Start
                                 </Button>
                             )}
                         </HStack>

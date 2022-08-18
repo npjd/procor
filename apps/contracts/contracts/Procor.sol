@@ -28,7 +28,7 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
     uint256 constant ACTIVE = 2;
     uint256 constant ENDED = 3;
 
-    uint256 fee = 1000000000000000000;
+    uint256 fee = 0;
 
     // structs
 
