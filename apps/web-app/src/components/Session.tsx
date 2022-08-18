@@ -33,7 +33,7 @@ export default function Session({ signer, contract, session, identity, onPrevCli
 
     useEffect(() => {
         getQuestions().then(setQuestions)
-    }, [signer, contract, event])
+    }, [signer, contract, session])
 
     // TODO: code question posting
     const postQuestion = useCallback(async () => {
@@ -50,7 +50,7 @@ export default function Session({ signer, contract, session, identity, onPrevCli
 
                     // TODO: fix this part
                     group.addMembers(members)
-                    
+
                     const { proof, publicSignals } = await generateProof(
                         identity,
                         group,
