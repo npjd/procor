@@ -7,16 +7,12 @@ import "@semaphore-protocol/contracts/base/SemaphoreGroups.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
-    // events
 
-    // new sesssion added
-    // sesssion started
-    // sesssion ended
+    event SessionCreated(uint256 indexed sessionId, string name, address owner, uint256 state, uint256 createdAt);
+    event UserJoined(uint256 indexed sessionId, uint256 identityCommitment, uint256 joinedAt); 
+    event QuestionAsked(uint256 indexed sessionId, uint256 indexed questionId, bytes32 question, uint256 askedAt);
+    event QuestionVoted(uint256 indexed sessionId, uint256 indexed questionId, uint256 votes, uint256 votedAt);
 
-    // user joined
-    // user left
-
-    // question asekd
 
     // state
     mapping(uint256 => Session) public sessions;
@@ -97,6 +93,8 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
 
         sessionIds.push(sessionId);
 
+        emit SessionCreated(sessionId, eventName, msg.sender, NOT_STARTED, block.timestamp);
+
     }
 
     // start session
@@ -162,6 +160,8 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         sessions[sessionId].questions.push(q);
 
         _saveNullifierHash(nullifierHash);
+
+        emit QuestionAsked(sessionId, sessions[sessionId].questions.length - 1, quesiton, block.timestamp);
     }
 
     // vote for question
@@ -190,8 +190,10 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         uint256 questionId = externalNullifier % 1000;
         sessions[sessionId].questions[questionId].votes++;
         _saveNullifierHash(nullifierHash);
+
+        emit QuestionVoted(sessionId, questionId, sessions[sessionId].questions[questionId].votes, block.timestamp);
+        
         return (questionId, sessions[sessionId].questions[questionId].votes);
-        // return (questionId, 1);
     }
 
     function withdrawFunds() external onlyOwner returns (uint256) {
