@@ -5,6 +5,7 @@ import { generateProof, packToSolidityProof } from "@semaphore-protocol/proof"
 import { Contract, Signer } from "ethers"
 import { parseBytes32String } from "ethers/lib/utils"
 import { useCallback, useEffect, useState } from "react"
+import { Question, Session } from "src/types/Session"
 import IconAddCircleFill from "../icons/IconAddCircleFill"
 import IconRefreshLine from "../icons/IconRefreshLine"
 import Stepper from "./Stepper"
@@ -13,13 +14,13 @@ export type ProofStepProps = {
     signer?: Signer
     contract?: Contract
     identity: Identity
-    event: any
+    session: Session
     onPrevClick: () => void
 }
 
-export default function Session({ signer, contract, event, identity, onPrevClick }: ProofStepProps) {
+export default function Session({ signer, contract, session, identity, onPrevClick }: ProofStepProps) {
     const [_loading, setLoading] = useBoolean()
-    const [_questions, setQuestions] = useState<any[]>([])
+    const [_questions, setQuestions] = useState<Question[]>([])
 
     const getQuestions = useCallback(async () => {
         if (!signer || !contract) {
@@ -27,10 +28,8 @@ export default function Session({ signer, contract, event, identity, onPrevClick
         }
         // TODO: fetch question from contract
 
-        const reviews = await contract.queryFilter(contract.filters.ReviewPosted(event.groupId))
-
-        return reviews.map((r) => parseBytes32String(r.args![1]))
-    }, [signer, contract, event])
+        return session.questions
+    }, [signer, contract, session])
 
     useEffect(() => {
         getQuestions().then(setQuestions)
@@ -39,23 +38,24 @@ export default function Session({ signer, contract, event, identity, onPrevClick
     // TODO: code question posting
     const postQuestion = useCallback(async () => {
         if (contract && identity) {
-            const review = prompt("Please enter your review:")
+            const question = prompt("Please enter your review:")
 
-            if (review) {
+            if (question) {
                 setLoading.on()
                 // onLog(`Posting your anonymous review...`)
 
                 try {
-                    const members = await contract.queryFilter(contract.filters.MemberAdded(event.groupId))
+                    const members = session.members
                     const group = new Group()
 
-                    group.addMembers(members.map((m) => m.args![1].toString()))
-
+                    // TODO: fix this part
+                    group.addMembers(members)
+                    
                     const { proof, publicSignals } = await generateProof(
                         identity,
                         group,
-                        event.groupId.toString(),
-                        review
+                        session.sessionId.toString(),
+                        question
                     )
                     const solidityProof = packToSolidityProof(proof)
 
@@ -63,15 +63,23 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            review,
+                            question,
                             nullifierHash: publicSignals.nullifierHash,
-                            groupId: event.groupId.toString(),
+                            groupId: session.sessionId.toString(),
                             solidityProof
                         })
                     })
 
                     if (status === 200) {
-                        setQuestions((v) => [...v, review])
+                        // TODO: chnage the question Id Part
+                        setQuestions((v) => [
+                            ...v,
+                            {
+                                question,
+                                questionId: 0,
+                                votes: 0
+                            }
+                        ])
 
                         // onLog(`Your review was posted 🎉`)
                     } else {
@@ -109,7 +117,7 @@ export default function Session({ signer, contract, event, identity, onPrevClick
 
             <HStack pt="5" justify="space-between">
                 <Text fontWeight="bold" fontSize="lg">
-                    <b>{event.eventName}</b> ({event.members.length})
+                    <b>{session.eventName}</b> ({session.members.length})
                 </Text>
                 <Button
                     leftIcon={<IconRefreshLine />}
@@ -140,7 +148,11 @@ export default function Session({ signer, contract, event, identity, onPrevClick
                 <VStack spacing="3" align="left">
                     {_questions.map((_question, i) => (
                         <HStack key={i} p="3" borderWidth={1}>
-                            <Text>{_question}</Text>
+                            <Text>{parseBytes32String(_question.question)}</Text>
+                            <Text>
+                                <b>Votes:</b>
+                                {_question.votes}
+                            </Text>
                         </HStack>
                     ))}
                 </VStack>

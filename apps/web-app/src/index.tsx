@@ -60,11 +60,7 @@ function App() {
                 <Stack>
                     {_step === "identity" ? (
                         <IdentityStep onChange={setIdentity} onNextClick={() => setStep("sessions")} />
-                    ) : 
-                    
-                    // _step === "sessions" ?
-                    
-                    (
+                    ) : _step === "sessions" ? (
                         <ListSessions
                             signer={_signer}
                             contract={_contract}
@@ -72,21 +68,18 @@ function App() {
                             onPrevClick={() => setStep("identity")}
                             onSelect={(session) => {
                                 setSession(session)
-                                // setStep("session")
+                                setStep("session")
                             }}
                         />
-                    ) 
-                    
-                    // : (
-                    //     <Session
-                    //         signer={_signer}
-                    //         contract={_contract}
-                    //         identity={_identity as Identity}
-                    //         event={_session}
-                    //         onPrevClick={() => setStep("sessions")}
-                    //     />
-                    // )
-                    }
+                    ) : (
+                        <Session
+                            signer={_signer}
+                            contract={_contract}
+                            identity={_identity as Identity}
+                            session={_session as SessionType}
+                            onPrevClick={() => setStep("sessions")}
+                        />
+                    )}
                 </Stack>
             </Container>
         </>
