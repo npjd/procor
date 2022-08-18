@@ -20,7 +20,6 @@ function App() {
     const [_contract, setContract] = useState<Contract>()
     const [_session, setSession] = useState<SessionType>()
 
-    // TODO: change contract
     useEffect(() => {
         ;(async () => {
             const ethereum = (await detectEthereumProvider()) as any

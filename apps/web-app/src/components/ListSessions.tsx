@@ -1,6 +1,6 @@
 import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack } from "@chakra-ui/react"
 import { Identity } from "@semaphore-protocol/identity"
-import { Contract, Signer } from "ethers"
+import { BigNumber, Contract, Signer } from "ethers"
 import { formatBytes32String, parseBytes32String } from "ethers/lib/utils"
 import { useCallback, useEffect, useState } from "react"
 import IconCheck from "../icons/IconCheck"
@@ -33,11 +33,15 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         const sessionsWithIndentities = await Promise.all(
             sessions.map(async (session) => {
                 // TODO: check if these numbers work
-                const identityCommitments = await contract.viewSessionIdentitiyCommitments(session.sessionId)
+                const identityCommitments = await contract.viewSessionIdentitiyCommitments(session.sessionId) as BigNumber[]
+                const memberStringArray = identityCommitments.map((identityCommitment) => {
+                    const identity = identityCommitment.toString()
+                    return identity
+                })
                 console.log("identityCommitments", identityCommitments)
                 return {
                     ...session,
-                    members: identityCommitments
+                    members: memberStringArray
                 }
             })
         )
@@ -47,7 +51,6 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
 
     useEffect(() => {
         ;(async () => {
-            // TODO: does this even work wtf lol, fetch data properly
             const sessions = (await getSessions()) as unknown as Session[]
 
             if (sessions.length > 0) {
