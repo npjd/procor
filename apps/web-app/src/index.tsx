@@ -71,9 +71,9 @@ function App() {
                             contract={_contract}
                             identity={_identity as Identity}
                             onPrevClick={() => setStep("identity")}
-                            onSelect={(event) => {
-                                setSession(event)
-                                setStep("session")
+                            onSelect={(session) => {
+                                setSession(session)
+                                // setStep("session")
                             }}
                         />
                     ) 

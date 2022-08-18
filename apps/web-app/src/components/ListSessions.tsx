@@ -118,8 +118,9 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                     })
 
                     if (status === 200) {
-                        // session.members.push(_identityCommitment)
-                        // onSelect(session)
+                        const newSession = session;
+                        newSession.members = [...session.members, _identityCommitment]
+                        onSelect(newSession)
 
                         // onLog(`You joined the '${event.eventName}' event 🎉 Post your anonymous reviews!`)
                     } else {
