@@ -2,10 +2,10 @@ import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack }
 import { Group } from "@semaphore-protocol/group"
 import { Identity } from "@semaphore-protocol/identity"
 import { generateProof, packToSolidityProof } from "@semaphore-protocol/proof"
-import { Contract, Signer } from "ethers"
+import { BigNumber, Contract, Signer } from "ethers"
 import { parseBytes32String } from "ethers/lib/utils"
 import { useCallback, useEffect, useState } from "react"
-import { Question, Session } from "src/types/Session"
+import { Question, Session as SessionType } from "src/types/Session"
 import IconAddCircleFill from "../icons/IconAddCircleFill"
 import IconRefreshLine from "../icons/IconRefreshLine"
 import Stepper from "./Stepper"
@@ -14,7 +14,7 @@ export type ProofStepProps = {
     signer?: Signer
     contract?: Contract
     identity: Identity
-    session: Session
+    session: SessionType
     onPrevClick: () => void
 }
 
@@ -38,7 +38,7 @@ export default function Session({ signer, contract, session, identity, onPrevCli
     // TODO: code question posting
     const postQuestion = useCallback(async () => {
         if (contract && identity) {
-            const question = prompt("Please enter your review:")
+            const question = prompt("Please enter your question:")
 
             if (question) {
                 setLoading.on()
@@ -47,8 +47,9 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                 try {
                     const members = session.members
                     const group = new Group()
+                    console.log(members)
 
-                    // TODO: fix this part
+                    // TODO: make sure tthis works (it should add all identity commitments)
                     group.addMembers(members)
 
                     const { proof, publicSignals } = await generateProof(
@@ -57,29 +58,29 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                         session.sessionId.toString(),
                         question
                     )
-                    const solidityProof = packToSolidityProof(proof)
 
-                    const { status } = await fetch(`${process.env.RELAY_URL}/post-review`, {
+                    const solidityProof = packToSolidityProof(proof)
+                    // TODO: make sure merkle root stuff works
+                    const { status } = await fetch(`${process.env.RELAY_URL}/ask-question`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
+                            sessionId: session.sessionId,
                             question,
                             nullifierHash: publicSignals.nullifierHash,
-                            groupId: session.sessionId.toString(),
-                            solidityProof
+                            solidityProof,
+                            root: group.root.toString()
                         })
                     })
 
                     if (status === 200) {
                         // TODO: chnage the question Id Part
-                        setQuestions((v) => [
-                            ...v,
-                            {
-                                question,
-                                questionId: 0,
-                                votes: 0
-                            }
-                        ])
+                        const newQuestionObj: Question = {
+                            content: question,
+                            questionId: BigNumber.from(_questions.length.toString()),
+                            votes: BigNumber.from("0")
+                        }
+                        setQuestions((v) => [...v, newQuestionObj])
 
                         // onLog(`Your review was posted 🎉`)
                     } else {
@@ -148,10 +149,10 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                 <VStack spacing="3" align="left">
                     {_questions.map((_question, i) => (
                         <HStack key={i} p="3" borderWidth={1}>
-                            <Text>{parseBytes32String(_question.question)}</Text>
+                            <Text>{parseBytes32String(_question.content)}</Text>
                             <Text>
                                 <b>Votes:</b>
-                                {_question.votes}
+                                {_question.votes.toString()}
                             </Text>
                         </HStack>
                     ))}

@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers"
+
 export interface Session {
     sessionId: number
     eventName: string
@@ -8,7 +10,7 @@ export interface Session {
 }
 
 export interface Question {
-    questionId: number
-    question: string
-    votes: number
+    questionId: BigNumber
+    content: string
+    votes: BigNumber
 }
