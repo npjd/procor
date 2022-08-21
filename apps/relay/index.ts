@@ -99,14 +99,16 @@ app.post("/ask-question", async (req, res) => {
 })
 
 app.post("/vote-question", async (req, res) => {
-    const { signal, root, nullifierHash, externalNullifier, solidityProof } = req.body
+    const { signal, root, nullifierHash, externalNullifier, solidityProof, sessionId,questionId } = req.body
     try {
         const transaction = await procorContract.voteQuestion(
-            signal,
+            utils.formatBytes32String(signal),
             root,
             nullifierHash,
             externalNullifier,
-            solidityProof
+            solidityProof,
+            sessionId,
+            questionId
         )
 
         await transaction.wait()

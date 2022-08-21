@@ -26,8 +26,6 @@ export default function Session({ signer, contract, session, identity, onPrevCli
         if (!signer || !contract) {
             return []
         }
-        // TODO: fetch question from contract
-
         return session.questions
     }, [signer, contract, session])
 
@@ -35,7 +33,6 @@ export default function Session({ signer, contract, session, identity, onPrevCli
         getQuestions().then(setQuestions)
     }, [signer, contract, session])
 
-    // TODO: code question posting
     const postQuestion = useCallback(async () => {
         if (contract && identity) {
             const question = prompt("Please enter your question:")
@@ -98,6 +95,71 @@ export default function Session({ signer, contract, session, identity, onPrevCli
     }, [contract, identity])
 
     // TODO: add function for voting questions
+    const voteQuestion = useCallback(
+        async (questionId: number) => {
+            if (contract && identity) {
+                setLoading.on()
+                // onLog(`Posting your anonymous review...`)
+
+                try {
+                    const signal = session.sessionId * 1000 + questionId
+                    const members = session.members
+                    const group = new Group()
+                    console.log(members)
+
+                    // TODO: make sure tthis works (it should add all identity commitments)
+                    group.addMembers(members)
+
+                    const { proof, publicSignals } = await generateProof(
+                        identity,
+                        group,
+                        session.sessionId.toString(),
+                        signal.toString()
+                    )
+
+                    const solidityProof = packToSolidityProof(proof)
+                    // TODO: make sure merkle root stuff works
+                    const { status } = await fetch(`${process.env.RELAY_URL}/vote-question`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            sessionId: session.sessionId,
+                            signal: signal.toString(),
+                            nullifierHash: publicSignals.nullifierHash,
+                            solidityProof,
+                            root: group.root.toString(),
+                            questionId: questionId
+                        })
+                    })
+
+                    if (status === 200) {
+                        const newQuestionArray = _questions.map((question) => {
+                            console.log(question.questionId.toNumber())
+                            if (question.questionId.toNumber() === questionId) {
+                                return {
+                                    ...question,
+                                    votes: question.votes.add(1)
+                                }
+                            }
+                            return question
+                        })
+                        setQuestions(newQuestionArray)
+
+                        // onLog(`Your review was posted 🎉`)
+                    } else {
+                        // onLog("Some error occurred, please try again!")
+                    }
+                } catch (error) {
+                    console.error(error)
+
+                    // onLog("Some error occurred, please try again!")
+                } finally {
+                    setLoading.off()
+                }
+            }
+        },
+        [contract, identity]
+    )
 
     return (
         <>
@@ -154,6 +216,20 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                                 <b>Votes:</b>
                                 {_question.votes.toString()}
                             </Text>
+                            <Button
+                                w="100%"
+                                fontWeight="bold"
+                                justifyContent="right"
+                                colorScheme="primary"
+                                px="4"
+                                onClick={() => {
+                                    voteQuestion(_question.questionId.toNumber())
+                                }}
+                                isDisabled={_loading}
+                                leftIcon={<IconAddCircleFill />}
+                            >
+                                Vote Question{" "}
+                            </Button>
                         </HStack>
                     ))}
                 </VStack>

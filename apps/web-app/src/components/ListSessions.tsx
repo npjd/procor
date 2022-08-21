@@ -29,8 +29,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
         }
 
         const sessions = (await contract.viewSessions()) as Session[]
-        console.log("sessions from contract", sessions)
-        console.log("session questions", sessions[0].questions)
+
         const sessionsWithIndentities = await Promise.all(
             sessions.map(async (session) => {
                 // TODO: check if these numbers work

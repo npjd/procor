@@ -171,7 +171,9 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
         uint256 root,
         uint256 nullifierHash,
         uint256 externalNullifier,
-        uint256[8] calldata proof
+        uint256[8] calldata proof,
+        uint256 sessionId,
+        uint256 questionId
     )
         external
         sessionExists(externalNullifier / 1000)
@@ -186,8 +188,6 @@ contract Procor is SemaphoreCore, SemaphoreGroups, Ownable {
             proof,
             verifier
         );
-        uint256 sessionId = externalNullifier / 1000;
-        uint256 questionId = externalNullifier % 1000;
         sessions[sessionId].questions[questionId].votes++;
         _saveNullifierHash(nullifierHash);
 
