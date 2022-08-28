@@ -172,23 +172,18 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
     return (
         <>
             <Heading as="h2" size="xl">
-                Groups
+                Sessions
             </Heading>
 
             <Text pt="2" fontSize="md">
-                Semaphore{" "}
-                <Link href="https://semaphore.appliedzkp.org/docs/guides/groups" color="primary.500" isExternal>
-                    groups
-                </Link>{" "}
-                are binary incremental Merkle trees in which each leaf contains an identity commitment for a user.
-                Groups can be abstracted to represent events, polls, or organizations.
+                Create or join an AMA session to share your thoughts and opinions.
             </Text>
 
             <Divider pt="5" borderColor="gray.500" />
 
             <HStack pt="5" justify="space-between">
                 <Text fontWeight="bold" fontSize="lg">
-                    Groups
+                    Sessions
                 </Text>
                 <Button
                     leftIcon={<IconRefreshLine />}
@@ -211,7 +206,7 @@ export default function ListSessions({ signer, contract, identity, onPrevClick, 
                     isDisabled={_loading}
                     leftIcon={<IconAddCircleFill />}
                 >
-                    Create new group
+                    Create a new session
                 </Button>
             </Box>
 

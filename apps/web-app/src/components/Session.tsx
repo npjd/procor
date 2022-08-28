@@ -6,6 +6,7 @@ import { BigNumber, Contract, Signer } from "ethers"
 import { parseBytes32String } from "ethers/lib/utils"
 import { useCallback, useEffect, useState } from "react"
 import { Question, Session as SessionType } from "src/types/Session"
+import { TwitterIcon, TwitterShareButton } from "react-share"
 import IconAddCircleFill from "../icons/IconAddCircleFill"
 import IconRefreshLine from "../icons/IconRefreshLine"
 import Stepper from "./Stepper"
@@ -21,6 +22,15 @@ export type ProofStepProps = {
 export default function Session({ signer, contract, session, identity, onPrevClick }: ProofStepProps) {
     const [_loading, setLoading] = useBoolean()
     const [_questions, setQuestions] = useState<Question[]>([])
+    const [_accountAddress, setAccountAddress] = useState<string>("")
+
+    useEffect(() => {
+        const getAccountAddress = async () => {
+            const address = await signer!.getAddress()
+            setAccountAddress(address)
+        }
+        getAccountAddress()
+    }, [])
 
     const getQuestions = useCallback(async () => {
         if (!signer || !contract) {
@@ -164,16 +174,11 @@ export default function Session({ signer, contract, session, identity, onPrevCli
     return (
         <>
             <Heading as="h2" size="xl">
-                Proofs
+                Messages
             </Heading>
 
             <Text pt="2" fontSize="md">
-                Semaphore group members can anonymously{" "}
-                <Link href="https://semaphore.appliedzkp.org/docs/guides/proofs" color="primary.500" isExternal>
-                    prove
-                </Link>{" "}
-                that they are part of a group and that they are generating their own signals. Signals could be anonymous
-                votes, leaks, or reviews.
+                Here you can post messages to the group or vote on existing messages.
             </Text>
 
             <Divider pt="5" borderColor="gray.500" />
@@ -203,7 +208,7 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                     isDisabled={_loading}
                     leftIcon={<IconAddCircleFill />}
                 >
-                    Generate a signal
+                    Create a question
                 </Button>
             </Box>
 
@@ -230,6 +235,11 @@ export default function Session({ signer, contract, session, identity, onPrevCli
                             >
                                 Vote Question{" "}
                             </Button>
+                            {_accountAddress === session.owner && (
+                                <TwitterShareButton title={session.eventName +": "} url="">
+                                    <TwitterIcon size={32} round /> 
+                                </TwitterShareButton>
+                            )}
                         </HStack>
                     ))}
                 </VStack>
